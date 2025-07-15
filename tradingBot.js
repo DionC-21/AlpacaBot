@@ -23,7 +23,8 @@ class TradingBot {
 
   async testPythonEnvironment() {
     return new Promise((resolve, reject) => {
-      const pythonPath = path.join(__dirname, '..', 'venv311', 'bin', 'python');
+      // Use system python3 for Railway deployment
+      const pythonPath = 'python3';
       const pythonTest = spawn(pythonPath, ['-c', 'import alpaca_trade_api, yfinance; print("Python environment OK")']);
       
       pythonTest.stdout.on('data', (data) => {
@@ -253,8 +254,9 @@ class TradingBot {
 
   async executePythonScript(scriptName, inputData = null) {
     return new Promise((resolve, reject) => {
-      const scriptPath = path.join(__dirname, '..', 'python_scripts', scriptName);
-      const pythonPath = path.join(__dirname, '..', 'venv311', 'bin', 'python');
+      const scriptPath = path.join(__dirname, 'python_scripts', scriptName);
+      // Use system python3 for Railway deployment
+      const pythonPath = 'python3';
       
       if (!fs.existsSync(scriptPath)) {
         reject(new Error(`Python script not found: ${scriptPath}`));

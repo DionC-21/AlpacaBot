@@ -17,13 +17,24 @@ const app = express();
 const server = http.createServer(app);
 const io = socketIo(server, {
   cors: {
-    origin: "http://localhost:3000",
+    origin: [
+      "http://localhost:3000",
+      "https://*.railway.app",
+      "https://*.up.railway.app"
+    ],
     methods: ["GET", "POST"]
   }
 });
 
 // Middleware
-app.use(cors());
+app.use(cors({
+  origin: [
+    "http://localhost:3000",
+    "https://*.railway.app",
+    "https://*.up.railway.app"
+  ],
+  credentials: true
+}));
 app.use(express.json());
 
 // Serve static files if build directory exists
@@ -778,6 +789,70 @@ async function monitorExistingPositions() {
   }
 }
 
+// Helper function to read trades from CSV
+async function getTradesFromCSV() {
+  try {
+    const fs = require('fs');
+    const path = require('path');
+    const csvPath = path.join(__dirname, 'trade_log.csv');
+    
+    if (!fs.existsSync(csvPath)) {
+      return [];
+    }
+
+    const csvData = fs.readFileSync(csvPath, 'utf-8');
+    const lines = csvData.trim().split('\n');
+    
+    if (lines.length <= 1) {
+      return [];
+    }
+
+    const headers = lines[0].split(',');
+    const trades = [];
+
+    for (let i = 1; i < lines.length; i++) {
+      const values = lines[i].split(',');
+      if (values.length >= headers.length) {
+        const trade = {
+          id: `trade_${i}`,
+          timestamp: values[0],
+          symbol: values[1],
+          action: values[2],
+          shares: parseFloat(values[3]) || 0,
+          price: parseFloat(values[4]) || 0,
+          value: parseFloat(values[5]) || 0,
+          stopLoss: parseFloat(values[6]) || null,
+          takeProfit: parseFloat(values[7]) || null,
+          changePct: parseFloat(values[8]) || 0,
+          volume: parseFloat(values[9]) || 0,
+          session: values[2] === 'BUY' ? 'premarket' : 'market',
+          strategy: 'Ross Cameron Pattern'
+        };
+
+        // Calculate P&L for SELL orders
+        if (trade.action === 'SELL' && i > 1) {
+          const buyTrade = trades.find(t => 
+            t.symbol === trade.symbol && 
+            t.action === 'BUY' && 
+            new Date(t.timestamp) < new Date(trade.timestamp)
+          );
+          
+          if (buyTrade) {
+            trade.pnl = (trade.price - buyTrade.price) * trade.shares;
+          }
+        }
+
+        trades.push(trade);
+      }
+    }
+
+    return trades;
+  } catch (error) {
+    console.error('Error reading trades from CSV:', error);
+    return [];
+  }
+}
+
 // Initialize the application
 async function initialize() {
   try {
@@ -829,7 +904,7 @@ app.get('/api/trades', async (req, res) => {
   try {
     const fs = require('fs');
     const path = require('path');
-    const csvPath = path.join(__dirname, '..', 'trade_log.csv');
+    const csvPath = path.join(__dirname, 'trade_log.csv');
     
     if (!fs.existsSync(csvPath)) {
       return res.json({ trades: [], message: 'No trade log found' });
@@ -898,9 +973,8 @@ app.get('/api/trades/daily-stats', async (req, res) => {
   try {
     const { date } = req.query;
     
-    // Get trades for specific date or all trades
-    const tradesResponse = await fetch('http://localhost:3001/api/trades');
-    const { trades } = await tradesResponse.json();
+    // Get trades directly from CSV instead of making HTTP request
+    const trades = await getTradesFromCSV();
     
     if (date) {
       const dayTrades = trades.filter(trade => 
@@ -955,7 +1029,7 @@ app.get('/api/trades/export', async (req, res) => {
   try {
     const fs = require('fs');
     const path = require('path');
-    const csvPath = path.join(__dirname, '..', 'trade_log.csv');
+    const csvPath = path.join(__dirname, 'trade_log.csv');
     
     if (!fs.existsSync(csvPath)) {
       return res.status(404).json({ error: 'No trade log found' });
