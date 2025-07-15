@@ -68,6 +68,7 @@ cat > "$PACKAGE_DIR/package.json" << 'EOF'
   "license": "MIT"
 }
 EOF
+fi
 
 # Create Procfile for Railway
 cat > "$PACKAGE_DIR/Procfile" << 'EOF'
