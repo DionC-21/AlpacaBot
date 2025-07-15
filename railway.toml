@@ -1,0 +1,9 @@
+[build]
+builder = "nixpacks"
+
+[deploy]
+startCommand = "node index.js"
+healthcheckPath = "/health"
+
+[nixpacks]
+aptPkgs = ["python3", "python3-pip"]
