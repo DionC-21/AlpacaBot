@@ -4,7 +4,7 @@
   "description": "AlpacaBot Trading System - Railway Deployment",
   "main": "index.js",
   "scripts": {
-    "start": "node index.js",
+    "start": "echo 'Starting with npm...' && echo 'Node path:' && which node && echo 'Node version:' && node --version && node index.js",
     "dev": "nodemon index.js",
     "postinstall": "echo 'Node.js dependencies installed successfully'"
   },
