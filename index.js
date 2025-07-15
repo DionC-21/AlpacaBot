@@ -5,7 +5,8 @@ const http = require('http');
 const socketIo = require('socket.io');
 const moment = require('moment-timezone');
 const path = require('path');
-require('dotenv').config({ path: path.join(__dirname, '..', '.env') });
+const fs = require('fs');
+require('dotenv').config();
 
 // Import your existing trading modules
 const TradingBot = require('./tradingBot');
@@ -24,7 +25,14 @@ const io = socketIo(server, {
 // Middleware
 app.use(cors());
 app.use(express.json());
-app.use(express.static('client/build'));
+
+// Serve static files if client/build exists
+const clientBuildPath = path.join(__dirname, 'client', 'build');
+if (fs.existsSync(clientBuildPath)) {
+  app.use(express.static('client/build'));
+} else {
+  console.log('Client build directory not found, serving API only');
+}
 
 // Initialize trading bot and logger
 const logger = new Logger();
@@ -338,6 +346,22 @@ function stopBotManually() {
 }
 
 // API Routes
+// Root route for when no client build is available
+app.get('/', (req, res) => {
+  res.json({
+    name: 'AlpacaBot Trading System',
+    version: '1.0.0',
+    status: 'running',
+    endpoints: {
+      health: '/health',
+      status: '/api/status',
+      account: '/api/account',
+      positions: '/api/positions',
+      orders: '/api/orders'
+    }
+  });
+});
+
 app.get('/health', (req, res) => {
   res.status(200).json({
     status: 'healthy',
