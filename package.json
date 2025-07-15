@@ -2,9 +2,9 @@
   "name": "alpacabot-railway",
   "version": "1.0.0",
   "description": "AlpacaBot Trading System - Railway Deployment",
-  "main": "server/index.js",
+  "main": "index.js",
   "scripts": {
-    "start": "node server/index.js",
+    "start": "node index.js",
     "dev": "nodemon server/index.js"
   },
   "dependencies": {
