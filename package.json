@@ -2,13 +2,13 @@
   "name": "alpaca-trading-bot-app",
   "version": "1.0.0",
   "description": "Automated Ross Cameron Trading Bot with React Dashboard",
-  "main": "server/index.js",
+  "main": "index.js",
   "scripts": {
     "dev": "concurrently \"npm run server\" \"npm run client\"",
-    "server": "nodemon server/index.js",
+    "server": "nodemon index.js",
     "client": "cd client && npm start",
     "build": "cd client && npm run build",
-    "start": "node server/index.js",
+    "start": "node index.js",
     "install-all": "npm install && cd client && npm install",
     "setup": "npm run install-all"
   },

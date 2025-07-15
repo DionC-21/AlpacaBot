@@ -70,42 +70,20 @@ cat > "$PACKAGE_DIR/package.json" << 'EOF'
 EOF
 fi
 
-# Create Procfile for Railway
-cat > "$PACKAGE_DIR/Procfile" << 'EOF'
-web: node server/index.js
-worker: python3 ross_cameron_pattern_trader.py
+# Create minimal railway.toml (Railway's preferred config)
+cat > "$PACKAGE_DIR/railway.toml" << 'EOF'
+[build]
+builder = "nixpacks"
+
+[deploy]
+startCommand = "node server/index.js"
+healthcheckPath = "/health"
+healthcheckTimeout = 300
+restartPolicyType = "always"
 EOF
 
-# Create railway.json configuration
-cat > "$PACKAGE_DIR/railway.json" << 'EOF'
-{
-  "$schema": "https://railway.app/railway.schema.json",
-  "build": {
-    "builder": "nixpacks"
-  },
-  "deploy": {
-    "startCommand": "node server/index.js",
-    "healthcheckPath": "/health",
-    "healthcheckTimeout": 100,
-    "restartPolicyType": "always"
-  }
-}
-EOF
-
-# Create nixpacks.toml for custom build
-cat > "$PACKAGE_DIR/nixpacks.toml" << 'EOF'
-[phases.setup]
-nixPkgs = ["nodejs", "python3", "pip"]
-
-[phases.install]
-cmds = ["npm install", "pip install -r requirements.txt"]
-
-[phases.build]
-cmds = ["echo 'Build complete'"]
-
-[start]
-cmd = "node server/index.js"
-EOF
+# Note: We intentionally avoid Procfile and nixpacks.toml
+# Railway's auto-detection works better for Node.js + Python projects
 
 # Create .gitignore
 cat > "$PACKAGE_DIR/.gitignore" << 'EOF'

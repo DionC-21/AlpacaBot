@@ -1,0 +1,11 @@
+[variables]
+NODE_ENV = "production"
+
+[phases.setup]
+nixPkgs = ["nodejs", "python3", "pip"]
+
+[phases.install]
+cmds = ["npm ci", "pip install -r requirements.txt"]
+
+[start]
+cmd = "node index.js"
