@@ -5,7 +5,8 @@
   "main": "index.js",
   "scripts": {
     "start": "node index.js",
-    "dev": "nodemon index.js"
+    "dev": "nodemon index.js",
+    "postinstall": "echo 'Node.js dependencies installed successfully'"
   },
   "dependencies": {
     "express": "^4.18.2",

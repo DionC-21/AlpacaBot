@@ -7,4 +7,5 @@ fi
 
 # Start the Node.js application
 echo "Starting Node.js application..."
-node index.js
+# Use full path or ensure node is in PATH
+/usr/local/bin/node index.js || node index.js || nodejs index.js
